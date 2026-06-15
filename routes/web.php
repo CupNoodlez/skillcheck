@@ -1,25 +1,61 @@
 <?php
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Instructor;
+use App\Http\Controllers\Student;
+use App\Http\Controllers\Admin;
 
+// Root / Welcome route
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::group(['prefix' => 'student'], function() {
-    
-    Route::get('dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
-    Route::get('examList', [StudentController::class, 'examList'])->name('examList');
-    Route::get('scoreHistory', [StudentController::class, 'scoreHistory'])->name('scoreHistory');
-
+// Module 1: Authentication & Identity
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::group(['prefix' => 'admin'], function() {
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('createExam', [AdminController::class, 'createExam'])->name('createExam');
-    Route::get('questionBank', [AdminController::class, 'questionBank'])->name('questionBank');
+    // Module 2 & 4: Exam Management & Grading (Instructor Portal - Requires Instructor Middleware)
+    Route::middleware('role:instructor')->prefix('instructor')->name('instructor.')->group(function () {
+        // Exam Management
+        Route::get('/exams', [Instructor\ExamController::class, 'index'])->name('exams.index');
+        Route::get('/exams/create', [Instructor\ExamController::class, 'create'])->name('exams.create');
+        Route::post('/exams', [Instructor\ExamController::class, 'store'])->name('exams.store');
 
+        Route::get('/exams/{exam}/questions/create', [Instructor\QuestionController::class, 'create'])->name('questions.create');
+        Route::post('/exams/{exam}/questions', [Instructor\QuestionController::class, 'store'])->name('questions.store');
+
+        Route::get('/exams/{exam}/questions/{question}/options/create', [Instructor\OptionController::class, 'create'])->name('options.create');
+        Route::post('/exams/{exam}/questions/{question}/options', [Instructor\OptionController::class, 'store'])->name('options.store');
+
+        // Grading & Evaluation
+        Route::get('/exams/{exam}/submissions', [Instructor\SubmissionController::class, 'index'])->name('submissions.index');
+        Route::get('/submissions/{attempt}/grade', [Instructor\SubmissionController::class, 'show'])->name('submissions.grade');
+        Route::put('/answers/{answer}/grade', [Instructor\AnswerController::class, 'update'])->name('answers.grade.update');
+        Route::post('/attempts/{attempt}/finalize', [Instructor\SubmissionController::class, 'finalize'])->name('attempts.finalize');
+    });
+
+    // Module 3 & 4: Test-Taking Environment & Student Submission (Student Portal - Requires Student Middleware)
+    Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::get('/exams', [Student\ExamController::class, 'index'])->name('exams.index');
+        Route::post('/exams/{exam}/attempt', [Student\AttemptController::class, 'store'])->name('exams.attempt.store');
+        Route::get('/exams/{exam}/attempt/{attempt}/take', [Student\AttemptController::class, 'show'])->name('exams.attempt.take');
+        Route::post('/exams/{exam}/attempt/{attempt}/answers', [Student\AnswerController::class, 'store'])->name('exams.attempt.answers.store');
+        Route::post('/exams/{exam}/attempt/{attempt}/submit', [Student\AttemptController::class, 'submit'])->name('exams.attempt.submit');
+    });
+
+    // Module 5: Admin Operations (Admin Portal - Requires Admin Middleware)
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/users', [Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}/role', [Admin\UserController::class, 'updateRole'])->name('users.role.update');
+    });
 });
