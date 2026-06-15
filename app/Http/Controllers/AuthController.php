@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -21,15 +22,30 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        // TODO: Validate request (name, email, password, etc.)
-        // TODO: Create a new User model
-        // TODO: Hash password using Hash::make($request->password)
-        // TODO: Set default user role to 'student'
-        // TODO: Save the user record in the database
-        // TODO: Auto-login the user using Auth::login($user)
-        // TODO: Redirect to the student dashboard
+        $validated = $request->validate([
+            'username' => 'required|string|max:50|unique:Users,username',
+            'email' => 'required|string|email|max:255|unique:Users,email',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'sometimes|string|in:student,instructor',
+        ]);
 
-        return redirect()->route('student.exams.index');
+        $user = User::create([
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+            'password_hash' => Hash::make($validated['password']),
+            'role' => $validated['role'] ?? 'student',
+        ]);
+
+        Auth::login($user);
+
+        // Redirect based on role
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'instructor') {
+            return redirect()->route('instructor.exams.index');
+        } else {
+            return redirect()->route('student.exams.index');
+        }
     }
 
     /**
@@ -45,14 +61,29 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        // TODO: Validate credentials (email, password)
-        // TODO: Attempt authentication using Auth::attempt($credentials)
-        // TODO: Check the user's role to redirect to the proper dashboard:
-        //       - 'admin' -> Redirect to admin.dashboard
-        //       - 'instructor' -> Redirect to instructor.exams.index
-        //       - 'student' -> Redirect to student.exams.index
+        $credentials = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
 
-        return redirect()->intended('/');
+        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            // Redirect to role-specific dashboard
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->role === 'instructor') {
+                return redirect()->route('instructor.exams.index');
+            } else {
+                return redirect()->route('student.exams.index');
+            }
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
     /**
@@ -60,10 +91,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // TODO: Auth::logout()
-        // TODO: Invalidate the session ($request->session()->invalidate())
-        // TODO: Regenerate the CSRF token ($request->session()->regenerateToken())
-        // TODO: Redirect to login page
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('login');
     }
