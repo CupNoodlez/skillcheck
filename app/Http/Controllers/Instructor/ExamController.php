@@ -14,12 +14,26 @@ class ExamController extends Controller
      */
     public function index()
     {
-        // Retrieve exams created by the authenticated instructor, eager loading questions and options
-        $exams = Exam::with('questions.options')
-            ->where('instructor_id', Auth::id())
-            ->get();
+        // Retrieve exams created by the authenticated instructor
+        $exams = Exam::where('instructor_id', Auth::id())->get();
 
         return view('instructor.exams.index', compact('exams'));
+    }
+
+    /**
+     * Display the specified exam and its questions.
+     */
+    public function show(Exam $exam)
+    {
+        // Ensure the authenticated instructor owns this exam
+        if ($exam->instructor_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Load the questions and options for this specific exam
+        $exam->load('questions.options');
+
+        return view('instructor.exams.show', compact('exam'));
     }
 
     /**

@@ -1,98 +1,68 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>Instructor Dashboard - Exams List</h1>
-    <p>Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }})</p>
-
-    <!-- Logout -->
-    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit">Logout</button>
-    </form>
-
-    <hr>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0">Instructor Dashboard - Exams List</h1>
+            <p class="text-muted mb-0">Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }})</p>
+        </div>
+        <div>
+            <!-- Logout -->
+            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger">Logout</button>
+            </form>
+        </div>
+    </div>
 
     @if (session('success'))
-        <div style="color: green; font-weight: bold; margin-bottom: 15px;">
+        <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
 
     @if (session('error'))
-        <div style="color: red; font-weight: bold; margin-bottom: 15px;">
+        <div class="alert alert-danger">
             {{ session('error') }}
         </div>
     @endif
 
-    <div>
-        <a href="{{ route('instructor.exams.create') }}"><strong>[ + Create New Exam ]</strong></a>
+    <div class="mb-4">
+        <a href="{{ route('instructor.exams.create') }}" class="btn btn-primary">+ Create New Exam</a>
     </div>
 
-    <hr>
-
     @if ($exams->isEmpty())
-        <p>No exams created yet.</p>
+        <div class="card p-4 text-center text-muted">
+            No exams created yet.
+        </div>
     @else
-        @foreach ($exams as $exam)
-            <div style="border: 1px solid black; padding: 15px; margin-bottom: 20px;">
-                <h2>Exam: {{ $exam->title }}</h2>
-                <p><strong>Description:</strong> {{ $exam->description ?? 'No description' }}</p>
-                <p><strong>Duration:</strong> {{ $exam->duration_s }} seconds ({{ round($exam->duration_s / 60, 2) }} minutes)</p>
-                <p><strong>Start Time:</strong> {{ $exam->start_time ?? 'N/A' }}</p>
-                <p><strong>End Time:</strong> {{ $exam->end_time ?? 'N/A' }}</p>
-                
-                <p>
-                    <strong>Student Link:</strong> 
-                    <input type="text" readonly value="{{ route('student.exams.show', ['exam' => $exam->exam_id]) }}" style="width: 400px;">
-                </p>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach ($exams as $exam)
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title h4 text-primary mb-3">{{ $exam->title }}</h2>
+                            <p class="card-text text-muted mb-4">{{ $exam->description ?? 'No description' }}</p>
+                            
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2"><strong>Duration:</strong> {{ $exam->duration_s }} seconds ({{ round($exam->duration_s / 60, 2) }} minutes)</li>
+                                <li class="mb-2"><strong>Start Time:</strong> {{ $exam->start_time ?? 'N/A' }}</li>
+                                <li class="mb-2"><strong>End Time:</strong> {{ $exam->end_time ?? 'N/A' }}</li>
+                            </ul>
 
-                <p>
-                    <a href="{{ route('instructor.questions.create', ['exam' => $exam->exam_id]) }}"><strong>[ + Add Question ]</strong></a>
-                    | 
-                    <a href="{{ route('instructor.submissions.index', ['exam' => $exam->exam_id]) }}"><strong>[ View Submissions ]</strong></a>
-                </p>
+                            <div class="mb-3">
+                                <label class="form-label mb-1"><strong>Student Link:</strong></label>
+                                <input type="text" readonly value="{{ route('student.exams.show', ['exam' => $exam->exam_id]) }}" class="form-control form-control-sm bg-light">
+                            </div>
 
-                <h3>Questions ({{ $exam->questions->count() }})</h3>
-                @if ($exam->questions->isEmpty())
-                    <p>No questions added to this exam yet.</p>
-                @else
-                    <ol>
-                        @foreach ($exam->questions as $question)
-                            <li style="margin-bottom: 15px;">
-                                <strong>Question Index:</strong> {{ $question->order_index }} | 
-                                <strong>Type:</strong> {{ $question->type }} | 
-                                <strong>Marks:</strong> {{ $question->marks }}
-                                @if ($question->time_limit_s)
-                                    | <strong>Time Limit:</strong> {{ $question->time_limit_s }} seconds
-                                @endif
-                                @if ($question->image_url)
-                                    <br><strong>Image:</strong><br>
-                                    <img src="{{ filter_var($question->image_url, FILTER_VALIDATE_URL) ? $question->image_url : asset('storage/' . $question->image_url) }}" alt="Question Image" style="max-width: 150px; max-height: 150px; display: block; margin-top: 5px; margin-bottom: 5px;">
-                                @endif
-                                <p><em>{{ $question->question_text }}</em></p>
-
-                                <p>
-                                    <a href="{{ route('instructor.questions.edit', ['exam' => $exam->exam_id, 'question' => $question->question_id]) }}"><strong>[ Edit Question ]</strong></a>
-                                </p>
-
-                                @if (in_array($question->type, ['multiple_choice', 'true_false', 'question_answer']))
-                                    <ul>
-                                        @foreach ($question->options as $option)
-                                            <li>
-                                                Index: {{ $option->order_index }} | 
-                                                {{ $option->option_text }}
-                                                @if ($option->is_correct)
-                                                    <strong style="color: green;">[ CORRECT ANSWER ]</strong>
-                                                @endif
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ol>
-                @endif
-            </div>
-        @endforeach
+                            <div class="d-flex flex-wrap gap-2 mt-4">
+                                <a href="{{ route('instructor.exams.show', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-primary btn-sm">View & Manage Questions</a>
+                                <a href="{{ route('instructor.submissions.index', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-secondary btn-sm">View Submissions</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
     @endif
 @endsection
