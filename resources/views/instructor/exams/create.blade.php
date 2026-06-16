@@ -61,6 +61,14 @@
                         <div class="form-text text-muted">If checked, the system will shuffle the order of questions for each student attempt.</div>
                     </div>
 
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="viewable_responses" name="viewable_responses" value="1" {{ old('viewable_responses') ? 'checked' : '' }}>
+                        <label class="form-check-label fw-bold" for="viewable_responses">
+                            Allow Students to View Responses
+                        </label>
+                        <div class="form-text text-muted">If checked, students will be able to review their answers and scores after completing the exam.</div>
+                    </div>
+
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">Create Exam</button>
                     </div>

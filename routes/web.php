@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/exams/{exam}', [Student\ExamController::class, 'show'])->name('exams.show');
         Route::post('/exams/{exam}/attempt', [Student\AttemptController::class, 'store'])->name('exams.attempt.store');
         Route::get('/exams/{exam}/attempt/{attempt}/take', [Student\AttemptController::class, 'show'])->name('exams.attempt.take');
+        Route::get('/exams/{exam}/attempt/{attempt}/review', [Student\AttemptController::class, 'review'])->name('exams.attempt.review');
         Route::post('/exams/{exam}/attempt/{attempt}/answers', [Student\AnswerController::class, 'store'])->name('exams.attempt.answers.store');
         Route::post('/exams/{exam}/attempt/{attempt}/submit', [Student\AttemptController::class, 'submit'])->name('exams.attempt.submit');
     });

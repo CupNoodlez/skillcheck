@@ -54,6 +54,12 @@
                                         {{ $exam->randomize_questions ? 'Randomized' : 'Sequential' }}
                                     </span>
                                 </li>
+                                <li class="mb-2">
+                                    <strong>Viewable Responses:</strong> 
+                                    <span class="badge bg-{{ $exam->viewable_responses ? 'success text-white' : 'danger text-white' }}">
+                                        {{ $exam->viewable_responses ? 'Enabled' : 'Disabled' }}
+                                    </span>
+                                </li>
                             </ul>
 
                             <div class="mb-3">

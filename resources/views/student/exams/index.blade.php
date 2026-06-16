@@ -98,7 +98,11 @@
                                         @if($attempt->status === 'in_progress')
                                             <a href="{{ route('student.exams.attempt.take', ['exam' => $attempt->exam_id, 'attempt' => $attempt->attempt_id]) }}" class="btn btn-primary btn-sm">Resume</a>
                                         @else
-                                            <button class="btn btn-secondary btn-sm" disabled>Completed</button>
+                                            @if($attempt->exam && $attempt->exam->viewable_responses)
+                                                <a href="{{ route('student.exams.attempt.review', ['exam' => $attempt->exam_id, 'attempt' => $attempt->attempt_id]) }}" class="btn btn-success btn-sm">View Responses</a>
+                                            @else
+                                                <button class="btn btn-secondary btn-sm" disabled title="Responses are locked by the instructor">Completed</button>
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>

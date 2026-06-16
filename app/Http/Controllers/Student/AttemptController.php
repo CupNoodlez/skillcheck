@@ -182,6 +182,49 @@ class AttemptController extends Controller
     }
 
     /**
+     * Review a completed exam attempt if viewable_responses is enabled.
+     */
+    public function review($examId, $attemptId)
+    {
+        $attempt = ExamAttempt::with(['exam.questions.options', 'answers'])->findOrFail($attemptId);
+
+        if ($attempt->student_id !== Auth::id() || $attempt->exam_id !== $examId) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($attempt->status === 'in_progress') {
+            return redirect()->route('student.exams.attempt.take', [
+                'exam' => $examId,
+                'attempt' => $attemptId
+            ]);
+        }
+
+        if (!$attempt->exam->viewable_responses) {
+            return redirect()->route('student.exams.index')
+                ->with('error', 'Viewing responses for this exam has been disabled by the instructor.');
+        }
+
+        $exam = $attempt->exam;
+        $answers = $attempt->answers->keyBy('question_id');
+
+        // Preserves the order in which the student took the questions
+        if (!empty($attempt->question_order)) {
+            $orderedQuestionIds = $attempt->question_order;
+            $questions = $exam->questions()
+                ->with('options')
+                ->whereIn('question_id', $orderedQuestionIds)
+                ->get()
+                ->sortBy(function ($question) use ($orderedQuestionIds) {
+                    return array_search($question->question_id, $orderedQuestionIds);
+                });
+        } else {
+            $questions = $exam->questions()->with('options')->orderBy('order_index')->get();
+        }
+
+        return view('student.attempts.review', compact('attempt', 'exam', 'questions', 'answers'));
+    }
+
+    /**
      * Reusable logic to finalize and grade auto-gradable questions.
      */
     protected function submitAttempt(ExamAttempt $attempt)

@@ -26,9 +26,17 @@
             
             <div class="row mt-2">
                 <div class="col-md-12">
-                    <strong>Question Ordering:</strong> 
-                    <span class="badge bg-{{ $exam->randomize_questions ? 'info text-white' : 'secondary text-white' }}">
-                        {{ $exam->randomize_questions ? 'Randomized' : 'Sequential (Order Index)' }}
+                    <span class="me-3">
+                        <strong>Question Ordering:</strong> 
+                        <span class="badge bg-{{ $exam->randomize_questions ? 'info text-white' : 'secondary text-white' }}">
+                            {{ $exam->randomize_questions ? 'Randomized' : 'Sequential (Order Index)' }}
+                        </span>
+                    </span>
+                    <span>
+                        <strong>Viewable Responses:</strong> 
+                        <span class="badge bg-{{ $exam->viewable_responses ? 'success text-white' : 'danger text-white' }}">
+                            {{ $exam->viewable_responses ? 'Enabled' : 'Disabled' }}
+                        </span>
                     </span>
                 </div>
             </div>

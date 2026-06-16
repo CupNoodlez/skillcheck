@@ -24,10 +24,12 @@ class Exam extends Model
         'end_time',
         'duration_s',
         'randomize_questions',
+        'viewable_responses',
     ];
 
     protected $casts = [
         'randomize_questions' => 'boolean',
+        'viewable_responses' => 'boolean',
     ];
 
     public function instructor()
