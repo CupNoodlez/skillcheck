@@ -4,7 +4,14 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>My Exam Dashboard</h1>
-        <div>
+        <div class="d-flex align-items-center">
+            @if(auth()->user()->profile_picture)
+                <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" alt="Profile Picture" class="rounded-circle me-2 shadow-sm" style="width: 35px; height: 35px; object-fit: cover; border: 1.5px solid #0d6efd;">
+            @else
+                <span class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center me-2 fw-bold shadow-sm" style="width: 35px; height: 35px; font-size: 0.9rem; border: 1.5px solid #6c757d;">
+                    {{ strtoupper(substr(auth()->user()->username ?? 'G', 0, 1)) }}
+                </span>
+            @endif
             <span class="me-3 text-muted">Logged in as: <strong>{{ auth()->user()->username }}</strong></span>
             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                 @csrf

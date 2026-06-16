@@ -27,13 +27,20 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:Users,email',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'sometimes|string|in:student,instructor',
+            'profile_picture' => 'nullable|image|max:2048',
         ]);
+
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
+        }
 
         $user = User::create([
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password_hash' => Hash::make($validated['password']),
             'role' => $validated['role'] ?? 'student',
+            'profile_picture' => $profilePicturePath,
         ]);
 
         Auth::login($user);

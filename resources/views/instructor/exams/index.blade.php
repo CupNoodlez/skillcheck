@@ -2,9 +2,18 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h2 mb-0">Instructor Dashboard - Exams List</h1>
-            <p class="text-muted mb-0">Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }})</p>
+        <div class="d-flex align-items-center">
+            @if(auth()->user()->profile_picture)
+                <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" alt="Profile Picture" class="rounded-circle me-3 shadow-sm" style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #0d6efd;">
+            @else
+                <span class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center me-3 fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 1.2rem; border: 2px solid #6c757d;">
+                    {{ strtoupper(substr(auth()->user()->username ?? 'G', 0, 1)) }}
+                </span>
+            @endif
+            <div>
+                <h1 class="h2 mb-0">Instructor Dashboard - Exams List</h1>
+                <p class="text-muted mb-0">Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }})</p>
+            </div>
         </div>
         <div>
             <!-- Logout -->

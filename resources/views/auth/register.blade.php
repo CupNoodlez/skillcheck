@@ -17,7 +17,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('register') }}" method="POST">
+                <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -47,6 +47,12 @@
                             <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student (Take Exams)</option>
                             <option value="instructor" {{ old('role') === 'instructor' ? 'selected' : '' }}>Instructor (Manage Exams)</option>
                         </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="profile_picture" class="form-label text-secondary small fw-bold">Profile Picture</label>
+                        <input type="file" name="profile_picture" id="profile_picture" class="form-control" accept="image/*">
+                        <div class="form-text">Optional. Recommended format: JPEG/PNG/WebP, max 2MB.</div>
                     </div>
 
                     <div class="d-grid mt-4">
