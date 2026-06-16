@@ -16,8 +16,8 @@
     <form action="{{ route('login') }}" method="POST">
         @csrf
         <div>
-            <label for="email">Email Address:</label>
-            <input type="email" name="email" id="email" value="{{ old('email') }}" required>
+            <label for="login">Username or Email:</label>
+            <input type="text" name="login" id="login" value="{{ old('login') }}" required>
         </div>
         <br>
         <div>
