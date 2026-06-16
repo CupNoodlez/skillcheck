@@ -34,6 +34,11 @@
             <div class="d-flex gap-2 mt-4">
                 <a href="{{ route('instructor.questions.create', ['exam' => $exam->exam_id]) }}" class="btn btn-success">+ Add Question</a>
                 <a href="{{ route('instructor.submissions.index', ['exam' => $exam->exam_id]) }}" class="btn btn-secondary">View Submissions</a>
+                <form action="{{ route('instructor.exams.destroy', ['exam' => $exam->exam_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this exam? This will permanently remove all associated questions, answers, and student attempts.');" style="display: inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete Exam</button>
+                </form>
             </div>
         </div>
     </div>

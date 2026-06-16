@@ -56,7 +56,7 @@
                             </div>
 
                             <div class="d-flex flex-wrap gap-2 mt-4">
-                                <a href="{{ route('instructor.exams.show', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-primary btn-sm">View & Manage Questions</a>
+                                <a href="{{ route('instructor.exams.show', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-primary btn-sm">Manage Exam</a>
                                 <a href="{{ route('instructor.submissions.index', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-secondary btn-sm">View Submissions</a>
                             </div>
                         </div>
