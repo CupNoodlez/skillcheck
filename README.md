@@ -1,61 +1,125 @@
-# skillcheck
-SkillCheck is an online examination system curated for efficient student assessment and convenient exam creation.
+# SkillCheck — Online Examination System
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+SkillCheck is a modern, feature-rich online examination and assessment system built on the **Laravel** framework. It is designed to facilitate convenient exam creation and management for instructors, a seamless test-taking environment for students, and comprehensive administration capabilities for system moderators.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## 🚀 Features by Role
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 👨‍🎓 Student Portal
+- **Available Exams Dashboard:** Browse active exams with details on duration, question count, and availability.
+- **Dynamic Test-Taking Interface:**
+  - Single-question pagination with instant answer saving.
+  - Custom question ordering support (supports question randomization).
+  - Time-limit tracker per question.
+- **Attempt History & Review:**
+  - View details of past attempts.
+  - Review submitted answers, correct answers, and marks awarded (dependent on exam visibility settings).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 👩‍🏫 Instructor Portal
+- **Exam Management:** Create, read, update, and delete exams with customized start/end times and durations.
+- **Question Bank & Customizations:**
+  - Add questions of different types: Multiple Choice (MCQ), True/False, Short Answer, and Essay.
+  - Reorder questions using a drag-and-drop or index reordering interface.
+  - Optional image uploads or external image URLs for visual question context.
+  - Prevent edits to active exams via lock states.
+- **Import & Export:** Seamlessly export exam questions to standard JSON files or import them to populate new exams.
+- **Grading & Evaluation:**
+  - Immediate auto-grading of MCQs, True/False, and Short Answer questions.
+  - Dedicated interface to review and manually grade student Essay submissions.
+  - Finalize grading to publish results.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👑 Admin Dashboard
+- **System Metrics:** High-level overview of total users, active exams, and exam attempts.
+- **User Moderation:** Manage student and instructor accounts, including toggling suspension/ban status.
+- **Content Moderation:** Monitor, manage, and delete exams across the platform to ensure policy compliance.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Technology Stack
+- **Core Backend:** PHP 8.3+, Laravel 13.x
+- **Frontend / Templating:** Laravel Blade, Vite 8.x, TailwindCSS v4, Bootstrap v5
+- **Database:** MariaDB (default config), compatible with MySQL, PostgreSQL, SQLite, etc.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## ⚡ Getting Started
 
-## Agentic Development
+Follow these steps to set up the project locally.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Prerequisites
+- **PHP** >= 8.3
+- **Composer** (PHP Package Manager)
+- **Node.js** & **npm**
 
-```bash
-composer require laravel/boost --dev
+### Installation Steps
 
-php artisan boost:install
-```
+1. **Clone the Repository** and navigate to the project directory:
+   ```bash
+   git clone <repository-url> skillcheck
+   cd skillcheck
+   ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. **Install Composer Dependencies:**
+   ```bash
+   composer install
+   ```
 
-## Contributing
+3. **Install npm Dependencies:**
+   ```bash
+   npm install
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Environment Configuration:**
+   Copy the example environment file and generate the application key:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Code of Conduct
+5. **Database Setup & Seeding:**
+   Run migrations and seed the database with core accounts and mock exam data:
+   ```bash
+   php artisan migrate --seed
+   ```
+   *Note: Ensure your database server is running and database credentials match those in `.env` (configured for MariaDB).*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. **Compile Frontend Assets & Run Development Server:**
+   You can run the full environment using:
+   ```bash
+   composer dev
+   ```
+   Or run the services individually:
+   - Laravel Development Server: `php artisan serve`
+   - Vite Compilation: `npm run dev`
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🔑 Default Seeded Accounts
 
-## License
+The database seeder generates three default user roles with the password `password` for testing:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Role | Email | Username | Password |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@skillcheck.com` | `admin` | `password` |
+| **Instructor** | `instructor@skillcheck.com` | `instructor` | `password` |
+| **Student** | `student@skillcheck.com` | `student` | `password` |
+
+---
+
+## 📁 Project Structure Highlights
+
+- **`app/Http/Controllers/`**
+  - `AuthController.php` — User authentication & profile settings (with profile photo upload).
+  - `Admin/` — Admin controls for user suspension and exam moderation.
+  - `Instructor/` — Exam creation, JSON import/export, question reordering, and submission grading.
+  - `Student/` — Exam list, attempts management, dynamic test-taking views, and submission handling.
+- **`app/Models/`** — Core Eloquent models: `User`, `Exam`, `Question`, `Option`, `ExamAttempt`, `StudentAnswer`.
+- **`database/migrations/`** — Schema definitions supporting question randomization, question-locking states, and suspends.
+- **`resources/views/`** — Blade layouts and templates structured neatly by role modules.
+- **`routes/web.php`** — Role-based routes protected by authentication and role middleware.
+
+---
+
+## 📄 License
+This project is open-sourced under the [MIT license](LICENSE).
