@@ -26,7 +26,7 @@ class ExamController extends Controller
      */
     public function show($examId)
     {
-        $exam = Exam::findOrFail($examId);
+        $exam = Exam::with('instructor')->findOrFail($examId);
 
         $attempt = ExamAttempt::where('exam_id', $examId)
             ->where('student_id', Auth::id())

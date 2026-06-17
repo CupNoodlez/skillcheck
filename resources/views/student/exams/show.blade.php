@@ -17,7 +17,19 @@
                     <h3 class="mb-0">{{ $exam->title }}</h3>
                 </div>
                 <div class="card-body p-4">
-                    <h5 class="card-title text-secondary">Exam Details & Instructions</h5>
+                    <h5 class="card-title text-secondary mb-1">Exam Details & Instructions</h5>
+                    
+                    <div class="d-flex align-items-center mt-2 mb-3">
+                        @if($exam->instructor && $exam->instructor->profile_picture)
+                            <img src="{{ asset('storage/' . $exam->instructor->profile_picture) }}" alt="Instructor Profile" class="rounded-circle me-2 shadow-sm" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0d6efd;">
+                        @else
+                            <span class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center me-2 fw-bold shadow-sm" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                {{ strtoupper(substr($exam->instructor->username ?? 'I', 0, 1)) }}
+                            </span>
+                        @endif
+                        <span class="text-muted small">Instructor: <strong>{{ $exam->instructor->username ?? 'Unknown' }}</strong></span>
+                    </div>
+
                     <hr>
 
                     @if($exam->description)

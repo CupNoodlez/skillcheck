@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>admin.dashboard</h1>
-    <p>Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }})</p>
+    <h1>Admin Dashboard</h1>
+    <p>Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }}) | <a href="{{ route('profile.edit') }}">Edit Profile</a></p>
 
     <form action="{{ route('logout') }}" method="POST">
         @csrf

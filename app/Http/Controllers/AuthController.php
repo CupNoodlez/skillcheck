@@ -110,4 +110,48 @@ class AuthController extends Controller
 
         return redirect()->route('login');
     }
+
+    /**
+     * Show edit profile form.
+     */
+    public function editProfile()
+    {
+        $user = Auth::user();
+        return view('auth.profile', compact('user'));
+    }
+
+    /**
+     * Update user profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'username' => 'required|string|alpha_dash|min:3|max:50|unique:Users,username,' . $user->user_id . ',user_id',
+            'password' => 'nullable|string|min:6|confirmed',
+            'profile_picture' => 'nullable|image|max:2048',
+        ]);
+
+        $updateData = [
+            'username' => $validated['username'],
+        ];
+
+        if (!empty($validated['password'])) {
+            $updateData['password_hash'] = Hash::make($validated['password']);
+        }
+
+        if ($request->hasFile('profile_picture')) {
+            // Delete old profile picture if exists
+            if ($user->profile_picture) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+            }
+            $updateData['profile_picture'] = $request->file('profile_picture')->store('profile_pictures', 'public');
+        }
+
+        $user->update($updateData);
+
+        return redirect()->back()->with('success', 'Profile updated successfully.');
+    }
 }

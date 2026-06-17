@@ -22,7 +22,19 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-7">
-                        <p class="mb-2"><strong>Instructor:</strong> {{ $exam->instructor->name ?? 'N/A' }}</p>
+                        <p class="mb-2 d-flex align-items-center">
+                            <strong>Instructor:</strong>
+                            @if($exam->instructor && $exam->instructor->profile_picture)
+                                <img src="{{ asset('storage/' . $exam->instructor->profile_picture) }}" alt="Instructor Profile" class="rounded-circle ms-2 me-1 shadow-sm" style="width: 28px; height: 28px; object-fit: cover; border: 1.5px solid #0d6efd;">
+                            @elseif($exam->instructor)
+                                <span class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center ms-2 me-1 fw-bold shadow-sm" style="width: 28px; height: 28px; font-size: 0.75rem; border: 1.5px solid #6c757d;">
+                                    {{ strtoupper(substr($exam->instructor->username, 0, 1)) }}
+                                </span>
+                            @else
+                                <span class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center ms-2 me-1 fw-bold shadow-sm" style="width: 28px; height: 28px; font-size: 0.75rem; border: 1.5px solid #6c757d;">I</span>
+                            @endif
+                            <span class="ms-1">{{ $exam->instructor->username ?? 'N/A' }}</span>
+                        </p>
                         <p class="mb-2"><strong>Started At:</strong> {{ $attempt->start_time ? $attempt->start_time->format('Y-m-d H:i:s') : 'N/A' }}</p>
                         <p class="mb-0"><strong>Submitted At:</strong> {{ $attempt->end_time ? $attempt->end_time->format('Y-m-d H:i:s') : 'N/A' }}</p>
                     </div>

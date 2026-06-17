@@ -12,7 +12,7 @@
                     {{ strtoupper(substr(auth()->user()->username ?? 'G', 0, 1)) }}
                 </span>
             @endif
-            <span class="me-3 text-muted">Logged in as: <strong>{{ auth()->user()->username }}</strong></span>
+            <span class="me-3 text-muted">Logged in as: <strong>{{ auth()->user()->username }}</strong> (<a href="{{ route('profile.edit') }}" class="text-decoration-none small">Edit Profile</a>)</span>
             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>

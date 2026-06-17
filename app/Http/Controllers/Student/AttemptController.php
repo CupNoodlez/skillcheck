@@ -198,7 +198,7 @@ class AttemptController extends Controller
      */
     public function review($examId, $attemptId)
     {
-        $attempt = ExamAttempt::with(['exam.questions.options', 'answers'])->findOrFail($attemptId);
+        $attempt = ExamAttempt::with(['exam.instructor', 'exam.questions.options', 'answers'])->findOrFail($attemptId);
 
         if ($attempt->student_id !== Auth::id() || $attempt->exam_id !== $examId) {
             abort(403, 'Unauthorized action.');

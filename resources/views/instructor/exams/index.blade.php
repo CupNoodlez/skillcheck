@@ -12,7 +12,7 @@
             @endif
             <div>
                 <h1 class="h2 mb-0">Instructor Dashboard - Exams List</h1>
-                <p class="text-muted mb-0">Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }})</p>
+                <p class="text-muted mb-0">Logged in as: {{ auth()->user()->username ?? 'Guest' }} ({{ auth()->user()->email ?? '' }}) | <a href="{{ route('profile.edit') }}" class="text-decoration-none small">Edit Profile</a></p>
             </div>
         </div>
         <div>
