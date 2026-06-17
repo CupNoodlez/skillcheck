@@ -64,6 +64,14 @@
 
             <div class="d-flex gap-2 mt-4">
                 <a href="{{ route('instructor.questions.create', ['exam' => $exam->exam_id]) }}" class="btn btn-success">+ Add Question</a>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                    📥 Import Questions (JSON)
+                </button>
+                @if ($exam->questions->count() > 0)
+                    <a href="{{ route('instructor.questions.export', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-secondary">
+                        📤 Export Questions (JSON)
+                    </a>
+                @endif
                 @if ($exam->questions->count() > 1)
                     <a href="{{ route('instructor.questions.reorder', ['exam' => $exam->exam_id]) }}" class="btn btn-outline-primary">⇅ Reorder Questions</a>
                 @endif
@@ -139,4 +147,94 @@
             @endforeach
         </div>
     @endif
+
+    <!-- Import Questions Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="{{ route('instructor.questions.import', ['exam' => $exam->exam_id]) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="importModalLabel">Import Questions from JSON</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="json_file" class="form-label fw-bold">Choose JSON File</label>
+                            <input class="form-control" type="file" id="json_file" name="json_file" accept=".json" required>
+                            <div class="form-text text-muted">Upload a valid JSON file containing an array of questions. Max size 2MB.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Import Mode</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="import_mode" id="mode_append" value="append" checked>
+                                    <label class="form-check-label" for="mode_append">
+                                        <strong>Append</strong> (Add to existing questions)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="import_mode" id="mode_overwrite" value="overwrite">
+                                    <label class="form-check-label text-danger" for="mode_overwrite">
+                                        <strong>Overwrite</strong> (Delete all current questions in this exam first)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading fw-bold mb-2">Supported JSON Schema Example:</h6>
+                            <pre class="bg-dark text-light p-3 rounded mb-0" style="max-height: 250px; overflow-y: auto; font-size: 0.85rem;"><code>[
+  {
+    "question_text": "What is the capital of France?",
+    "type": "multiple_choice",
+    "marks": 5,
+    "time_limit_s": 60,
+    "is_locked": false,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Paris_Night.jpg",
+    "options": [
+      { "option_text": "Paris", "is_correct": true },
+      { "option_text": "London", "is_correct": false }
+    ]
+  },
+  {
+    "question_text": "Laravel is built with PHP.",
+    "type": "true_false",
+    "correct_answer": true,
+    "marks": 2
+  },
+  {
+    "question_text": "What is the name of Laravel's ORM?",
+    "type": "question_answer",
+    "correct_answers": ["Eloquent", "eloquent"],
+    "marks": 3
+  },
+  {
+    "question_text": "Explain the Laravel request lifecycle.",
+    "type": "essay",
+    "marks": 10
+  }
+]</code></pre>
+                        </div>
+
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="card-title fw-bold">💡 Tip for Local Images:</h6>
+                                <p class="card-text text-muted mb-0 small">
+                                    You can include web image URLs in your JSON (using <code>"image_url": "https://..."</code>). For local files, import the questions first, and then click <strong>Edit Question</strong> to upload local images manually.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Upload & Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection

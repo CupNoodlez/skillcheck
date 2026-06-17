@@ -36,6 +36,7 @@ class QuestionController extends Controller
             'type' => 'required|string|in:multiple_choice,true_false,question_answer,essay',
             'time_limit_s' => 'nullable|integer|min:1',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|string|max:2048',
             'marks' => 'required|numeric|min:0',
             'options' => 'nullable|array',
             'options.*' => 'nullable|string',
@@ -50,7 +51,7 @@ class QuestionController extends Controller
         $maxOrder = Question::where('exam_id', $exam->exam_id)->max('order_index');
         $nextOrder = ($maxOrder !== null) ? $maxOrder + 1 : 1;
 
-        $imagePath = null;
+        $imagePath = $validated['image_url'] ?? null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('questions', 'public');
         }
@@ -133,6 +134,7 @@ class QuestionController extends Controller
             'type' => 'required|string|in:multiple_choice,true_false,question_answer,essay',
             'time_limit_s' => 'nullable|integer|min:1',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|string|max:2048',
             'remove_image' => 'nullable',
             'marks' => 'required|numeric|min:0',
             'options' => 'nullable|array',
@@ -146,6 +148,17 @@ class QuestionController extends Controller
         ]);
 
         $imagePath = $question->image_url;
+
+        // If direct image URL input is changed/provided
+        if ($request->has('image_url')) {
+            $newImageUrl = $validated['image_url'];
+            if ($newImageUrl !== $question->image_url) {
+                if ($question->image_url && !filter_var($question->image_url, FILTER_VALIDATE_URL)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_url);
+                }
+                $imagePath = !empty($newImageUrl) ? trim($newImageUrl) : null;
+            }
+        }
 
         if ($request->has('remove_image')) {
             if ($question->image_url && !filter_var($question->image_url, FILTER_VALIDATE_URL)) {
@@ -347,5 +360,188 @@ class QuestionController extends Controller
 
         return redirect()->route('instructor.exams.show', $exam->exam_id)
             ->with('success', 'Question order updated successfully.');
+    }
+
+    /**
+     * Import questions from a JSON file.
+     */
+    public function import(Request $request, $examId)
+    {
+        $exam = Exam::where('instructor_id', Auth::id())
+            ->findOrFail($examId);
+
+        $request->validate([
+            'json_file' => 'required|file|max:2048', // Validate size, check type manually to support text/json variations
+            'import_mode' => 'required|string|in:append,overwrite',
+        ]);
+
+        $file = $request->file('json_file');
+        $jsonContent = file_get_contents($file->getRealPath());
+        $questions = json_decode($jsonContent, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return redirect()->back()->with('error', 'Invalid JSON file structure: ' . json_last_error_msg());
+        }
+
+        if (!is_array($questions)) {
+            return redirect()->back()->with('error', 'The JSON file must contain an array of questions.');
+        }
+
+        $importMode = $request->input('import_mode');
+
+        try {
+            DB::transaction(function () use ($exam, $questions, $importMode) {
+                // If overwrite mode, delete existing questions first (triggered individually to invoke Model deleting event and remove files)
+                if ($importMode === 'overwrite') {
+                    $exam->questions()->get()->each(function ($question) {
+                        $question->delete();
+                    });
+                    $nextOrder = 1;
+                } else {
+                    // Determine the next order index
+                    $maxOrder = Question::where('exam_id', $exam->exam_id)->max('order_index');
+                    $nextOrder = ($maxOrder !== null) ? $maxOrder + 1 : 1;
+                }
+
+                foreach ($questions as $index => $qData) {
+                    $questionNum = $index + 1;
+
+                    // Basic validation of fields
+                    if (empty($qData['question_text'])) {
+                        throw new \Exception("Question #{$questionNum} is missing 'question_text'.");
+                    }
+                    if (empty($qData['type'])) {
+                        throw new \Exception("Question #{$questionNum} is missing 'type'.");
+                    }
+
+                    $validTypes = ['multiple_choice', 'true_false', 'question_answer', 'essay'];
+                    if (!in_array($qData['type'], $validTypes)) {
+                        throw new \Exception("Question #{$questionNum} has an invalid 'type' ({$qData['type']}). Valid types: multiple_choice, true_false, question_answer, essay.");
+                    }
+
+                    // Create the question
+                    $question = Question::create([
+                        'exam_id' => $exam->exam_id,
+                        'order_index' => $nextOrder++,
+                        'question_text' => trim($qData['question_text']),
+                        'type' => $qData['type'],
+                        'time_limit_s' => isset($qData['time_limit_s']) ? intval($qData['time_limit_s']) : null,
+                        'image_url' => !empty($qData['image_url']) ? trim($qData['image_url']) : null,
+                        'marks' => isset($qData['marks']) ? floatval($qData['marks']) : 1.0,
+                        'is_locked' => !empty($qData['is_locked']),
+                    ]);
+
+                    // Save options/answers depending on the question type
+                    if ($qData['type'] === 'multiple_choice') {
+                        if (empty($qData['options']) || !is_array($qData['options'])) {
+                            throw new \Exception("Question #{$questionNum} of type 'multiple_choice' must contain an array of 'options'.");
+                        }
+
+                        $optionIndex = 1;
+                        foreach ($qData['options'] as $opt) {
+                            if (!isset($opt['option_text'])) {
+                                throw new \Exception("An option in Question #{$questionNum} is missing 'option_text'.");
+                            }
+                            Option::create([
+                                'question_id' => $question->question_id,
+                                'order_index' => $optionIndex++,
+                                'option_text' => trim($opt['option_text']),
+                                'is_correct' => !empty($opt['is_correct']),
+                            ]);
+                        }
+
+                    } elseif ($qData['type'] === 'true_false') {
+                        $correctAnswer = isset($qData['correct_answer']) ? $qData['correct_answer'] : 'True';
+                        $correctVal = filter_var($correctAnswer, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                        if ($correctVal === null) {
+                            $correctVal = (strtolower(trim($correctAnswer)) === 'true');
+                        }
+
+                        Option::create([
+                            'question_id' => $question->question_id,
+                            'order_index' => 1,
+                            'option_text' => 'True',
+                            'is_correct' => $correctVal === true,
+                        ]);
+                        Option::create([
+                            'question_id' => $question->question_id,
+                            'order_index' => 2,
+                            'option_text' => 'False',
+                            'is_correct' => $correctVal === false,
+                        ]);
+
+                    } elseif ($qData['type'] === 'question_answer') {
+                        if (empty($qData['correct_answers'])) {
+                            throw new \Exception("Question #{$questionNum} of type 'question_answer' must contain 'correct_answers'.");
+                        }
+
+                        $answers = (array) $qData['correct_answers'];
+                        $optionIndex = 1;
+                        foreach ($answers as $ans) {
+                            Option::create([
+                                'question_id' => $question->question_id,
+                                'order_index' => $optionIndex++,
+                                'option_text' => trim($ans),
+                                'is_correct' => true,
+                            ]);
+                        }
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
+        }
+
+        $count = count($questions);
+        return redirect()->route('instructor.exams.show', $exam->exam_id)
+            ->with('success', "Successfully imported {$count} questions.");
+    }
+
+    /**
+     * Export questions to a JSON file.
+     */
+    public function export($examId)
+    {
+        $exam = Exam::where('instructor_id', Auth::id())
+            ->with(['questions.options'])
+            ->findOrFail($examId);
+
+        $exportData = [];
+
+        foreach ($exam->questions as $question) {
+            $qData = [
+                'question_text' => $question->question_text,
+                'type' => $question->type,
+                'marks' => floatval($question->marks),
+                'time_limit_s' => $question->time_limit_s ? intval($question->time_limit_s) : null,
+                'is_locked' => (bool) $question->is_locked,
+                'image_url' => ($question->image_url && str_starts_with($question->image_url, 'http')) ? $question->image_url : null,
+            ];
+
+            if ($question->type === 'multiple_choice') {
+                $qData['options'] = [];
+                foreach ($question->options as $option) {
+                    $qData['options'][] = [
+                        'option_text' => $option->option_text,
+                        'is_correct' => (bool) $option->is_correct,
+                    ];
+                }
+            } elseif ($question->type === 'true_false') {
+                $trueOption = $question->options->firstWhere('option_text', 'True');
+                $qData['correct_answer'] = $trueOption ? (bool) $trueOption->is_correct : true;
+            } elseif ($question->type === 'question_answer') {
+                $qData['correct_answers'] = $question->options->where('is_correct', true)->pluck('option_text')->toArray();
+            }
+
+            $exportData[] = $qData;
+        }
+
+        $jsonString = json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $fileName = 'exam_' . \Illuminate\Support\Str::slug($exam->title) . '_questions.json';
+
+        return response($jsonString, 200, [
+            'Content-Type' => 'application/json',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ]);
     }
 }

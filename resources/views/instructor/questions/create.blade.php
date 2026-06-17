@@ -56,7 +56,17 @@
 
                     <div class="mb-4">
                         <label for="image" class="form-label fw-bold">Question Image (Optional)</label>
-                        <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                        <div class="card p-3 bg-light border-0">
+                            <div class="mb-3">
+                                <label for="image" class="form-label small fw-semibold text-secondary">Upload Local Image</label>
+                                <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                            </div>
+                            <div class="text-center my-2 text-muted fw-bold small">— OR —</div>
+                            <div>
+                                <label for="image_url" class="form-label small fw-semibold text-secondary">Image URL (Web Link)</label>
+                                <input type="url" id="image_url" name="image_url" class="form-control" placeholder="https://example.com/image.jpg" value="{{ old('image_url') }}">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-check mb-4">
