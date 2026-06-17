@@ -9,11 +9,30 @@ use Illuminate\Support\Facades\Auth;
 
 class ExamController extends Controller
 {
-    /**
-     * Display list of exams the student has already taken/attempted.
-     */
     public function index()
     {
+        $attempts = ExamAttempt::where('student_id', Auth::id())
+            ->where('status', 'in_progress')
+            ->with(['exam.questions'])
+            ->get();
+
+        foreach ($attempts as $attempt) {
+            $startTime = \Carbon\Carbon::parse($attempt->start_time);
+            $endTime = $startTime->copy()->addSeconds($attempt->exam->duration_s);
+            $isExpired = now()->greaterThanOrEqualTo($endTime);
+
+            if ($attempt->exam->end_time) {
+                $examEndTime = \Carbon\Carbon::parse($attempt->exam->end_time);
+                if (now()->greaterThanOrEqualTo($examEndTime)) {
+                    $isExpired = true;
+                }
+            }
+
+            if ($isExpired) {
+                $attempt->submit();
+            }
+        }
+
         $attempts = ExamAttempt::where('student_id', Auth::id())
             ->with(['exam'])
             ->get();
@@ -21,9 +40,6 @@ class ExamController extends Controller
         return view('student.exams.index', compact('attempts'));
     }
 
-    /**
-     * Display the exam landing/start page from a shared instructor link.
-     */
     public function show($examId)
     {
         $exam = Exam::with('instructor')->findOrFail($examId);
@@ -34,6 +50,23 @@ class ExamController extends Controller
 
         if ($attempt) {
             if ($attempt->status === 'in_progress') {
+                $startTime = \Carbon\Carbon::parse($attempt->start_time);
+                $endTime = $startTime->copy()->addSeconds($exam->duration_s);
+                $isExpired = now()->greaterThanOrEqualTo($endTime);
+
+                if ($exam->end_time) {
+                    $examEndTime = \Carbon\Carbon::parse($exam->end_time);
+                    if (now()->greaterThanOrEqualTo($examEndTime)) {
+                        $isExpired = true;
+                    }
+                }
+
+                if ($isExpired) {
+                    $attempt->submit();
+                    return redirect()->route('student.exams.index')
+                        ->with('error', 'You have already attempted this exam (time limit expired).');
+                }
+
                 return redirect()->route('student.exams.attempt.take', [
                     'exam' => $examId,
                     'attempt' => $attempt->attempt_id

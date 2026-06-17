@@ -66,4 +66,64 @@ class ExamAttempt extends Model
     {
         return $this->end_time;
     }
+
+    /**
+     * Finalize and grade the attempt.
+     */
+    public function submit()
+    {
+        if ($this->status !== 'in_progress') {
+            return;
+        }
+
+        $this->load(['exam.questions.options', 'answers']);
+        $answers = $this->answers->keyBy('question_id');
+
+        foreach ($this->exam->questions as $question) {
+            $answer = $answers->get($question->question_id);
+            if (!$answer) {
+                $answer = new StudentAnswer([
+                    'attempt_id' => $this->attempt_id,
+                    'question_id' => $question->question_id,
+                ]);
+            }
+
+            if ($question->type === 'multiple_choice' || $question->type === 'true_false') {
+                $correctOption = $question->options->firstWhere('is_correct', true);
+                if ($correctOption && $answer->selected_option === $correctOption->option_id) {
+                    $answer->marks_awarded = $question->marks;
+                } else {
+                    $answer->marks_awarded = 0;
+                }
+            } elseif ($question->type === 'question_answer') {
+                $correctAnswers = $question->options
+                    ->where('is_correct', true)
+                    ->pluck('option_text')
+                    ->map(fn($val) => strtolower(trim($val)))
+                    ->toArray();
+
+                $studentText = strtolower(trim($answer->text_answer ?? ''));
+                if (in_array($studentText, $correctAnswers) && $studentText !== '') {
+                    $answer->marks_awarded = $question->marks;
+                } else {
+                    $answer->marks_awarded = 0;
+                }
+            } elseif ($question->type === 'essay') {
+                // Keep marks_awarded as null for instructor manual grading.
+            }
+
+            $answer->save();
+        }
+
+        $this->status = 'submitted';
+        $this->end_time = now();
+        $this->save();
+
+        // If the exam has no essay questions, it can be auto-finalized as 'graded'
+        $hasEssay = $this->exam->questions->where('type', 'essay')->isNotEmpty();
+        if (!$hasEssay) {
+            $this->status = 'graded';
+            $this->save();
+        }
+    }
 }

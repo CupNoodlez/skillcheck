@@ -17,6 +17,28 @@ class SubmissionController extends Controller
     {
         $exam = Exam::where('instructor_id', Auth::id())->findOrFail($examId);
         
+        // Find all attempts to process any expired ones on-the-fly
+        $allAttempts = ExamAttempt::where('exam_id', $examId)->get();
+
+        foreach ($allAttempts as $attempt) {
+            if ($attempt->status === 'in_progress') {
+                $startTime = \Carbon\Carbon::parse($attempt->start_time);
+                $endTime = $startTime->copy()->addSeconds($exam->duration_s);
+                $isExpired = now()->greaterThanOrEqualTo($endTime);
+
+                if ($exam->end_time) {
+                    $examEndTime = \Carbon\Carbon::parse($exam->end_time);
+                    if (now()->greaterThanOrEqualTo($examEndTime)) {
+                        $isExpired = true;
+                    }
+                }
+
+                if ($isExpired) {
+                    $attempt->submit();
+                }
+            }
+        }
+        
         $attempts = ExamAttempt::where('exam_id', $examId)
             ->whereIn('status', ['submitted', 'graded'])
             ->with('student')
@@ -39,6 +61,28 @@ class SubmissionController extends Controller
         // Ensure the authenticated instructor owns the exam associated with this attempt
         if ($attempt->exam->instructor_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
+        }
+
+        // If it's in progress, check if it's expired to auto-submit on-the-fly
+        if ($attempt->status === 'in_progress') {
+            $startTime = \Carbon\Carbon::parse($attempt->start_time);
+            $endTime = $startTime->copy()->addSeconds($attempt->exam->duration_s);
+            $isExpired = now()->greaterThanOrEqualTo($endTime);
+
+            if ($attempt->exam->end_time) {
+                $examEndTime = \Carbon\Carbon::parse($attempt->exam->end_time);
+                if (now()->greaterThanOrEqualTo($examEndTime)) {
+                    $isExpired = true;
+                }
+            }
+
+            if ($isExpired) {
+                $attempt->submit();
+                $attempt->load('answers.question');
+            } else {
+                return redirect()->route('instructor.submissions.index', $attempt->exam_id)
+                    ->with('error', 'Cannot grade an attempt that is still in progress.');
+            }
         }
 
         // Key answers by question_id for easy lookup

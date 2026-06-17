@@ -93,7 +93,7 @@ class AttemptController extends Controller
         }
 
         if ($timedOut) {
-            $this->submitAttempt($attempt);
+            $attempt->submit();
             return redirect()->route('student.exams.index')
                 ->with('error', 'Time has expired. Your attempt has been automatically submitted.');
         }
@@ -187,7 +187,7 @@ class AttemptController extends Controller
                 ->with('error', 'Invalid attempt submission.');
         }
 
-        $this->submitAttempt($attempt);
+        $attempt->submit();
 
         return redirect()->route('student.exams.index')
             ->with('success', 'Your exam attempt has been submitted successfully.');
@@ -236,57 +236,7 @@ class AttemptController extends Controller
         return view('student.attempts.review', compact('attempt', 'exam', 'questions', 'answers'));
     }
 
-    /**
-     * Reusable logic to finalize and grade auto-gradable questions.
-     */
-    protected function submitAttempt(ExamAttempt $attempt)
-    {
-        $attempt->load('exam.questions.options');
 
-        foreach ($attempt->exam->questions as $question) {
-            $answer = StudentAnswer::firstOrNew([
-                'attempt_id' => $attempt->attempt_id,
-                'question_id' => $question->question_id,
-            ]);
-
-            if ($question->type === 'multiple_choice' || $question->type === 'true_false') {
-                $correctOption = $question->options->firstWhere('is_correct', true);
-                if ($correctOption && $answer->selected_option === $correctOption->option_id) {
-                    $answer->marks_awarded = $question->marks;
-                } else {
-                    $answer->marks_awarded = 0;
-                }
-            } elseif ($question->type === 'question_answer') {
-                $correctAnswers = $question->options
-                    ->where('is_correct', true)
-                    ->pluck('option_text')
-                    ->map(fn($val) => strtolower(trim($val)))
-                    ->toArray();
-
-                $studentText = strtolower(trim($answer->text_answer ?? ''));
-                if (in_array($studentText, $correctAnswers) && $studentText !== '') {
-                    $answer->marks_awarded = $question->marks;
-                } else {
-                    $answer->marks_awarded = 0;
-                }
-            } elseif ($question->type === 'essay') {
-                // Keep marks_awarded as null for instructor manual grading.
-            }
-
-            $answer->save();
-        }
-
-        $attempt->status = 'submitted';
-        $attempt->end_time = now();
-        $attempt->save();
-
-        // If the exam has no essay questions, it can be auto-finalized as 'graded'
-        $hasEssay = $attempt->exam->questions->where('type', 'essay')->isNotEmpty();
-        if (!$hasEssay) {
-            $attempt->status = 'graded';
-            $attempt->save();
-        }
-    }
 
     /**
      * Generate question order for the exam attempt, preserving locked question positions.
