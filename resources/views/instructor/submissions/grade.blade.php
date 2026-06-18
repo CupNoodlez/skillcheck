@@ -150,12 +150,21 @@
                             @endif
                         </div>
                         <div class="mt-2 small">
-                            <strong>Correct Setup:</strong>
+                            <strong>Options Setup:</strong>
                             <ul class="mb-0 ps-3">
                                 @foreach($question->options as $opt)
-                                    @if($opt->is_correct)
-                                        <li>{{ $opt->option_text }} <span class="badge bg-success bg-opacity-75 ms-1">Correct</span></li>
-                                    @endif
+                                    @php
+                                        $isStudentSelected = $answer && $answer->selected_option === $opt->option_id;
+                                    @endphp
+                                    <li class="{{ $isStudentSelected ? 'fw-bold' : '' }}">
+                                        {{ $opt->option_text }}
+                                        @if($opt->is_correct)
+                                            <span class="badge bg-success bg-opacity-75 ms-1">Correct</span>
+                                        @endif
+                                        @if($isStudentSelected)
+                                            <span class="badge bg-primary ms-1">Student Choice</span>
+                                        @endif
+                                    </li>
                                 @endforeach
                             </ul>
                         </div>
