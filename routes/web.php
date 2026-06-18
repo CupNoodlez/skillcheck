@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin;
 // Root / Welcome route
 Route::get('/', function () {
     return view('welcome');
-});
+})->middleware('guest');
 
 // Module 1: Authentication & Identity
 Route::middleware('guest')->group(function () {
