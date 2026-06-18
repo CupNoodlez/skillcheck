@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\CheckSuspended::class,
+            \App\Http\Middleware\AutoSubmitActiveAttempts::class,
         ]);
 
         $middleware->alias([

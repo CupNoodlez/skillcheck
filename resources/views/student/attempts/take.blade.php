@@ -120,6 +120,22 @@
     let secondsLeft = parseInt("{{ $timeLeft }}");
     const timerDisplay = document.getElementById('timer-display');
     const form = document.getElementById('question-form');
+    let isSubmittingNext = false;
+
+    // Set submit flag on regular form submission
+    form.addEventListener('submit', function() {
+        isSubmittingNext = true;
+    });
+
+    // Auto-submit via beacon when student navigates away or closes tab/window
+    window.addEventListener('pagehide', function (event) {
+        if (!isSubmittingNext) {
+            const url = "{{ route('student.exams.attempt.submit', [$exam->exam_id, $attempt->attempt_id]) }}";
+            const data = new FormData();
+            data.append('_token', "{{ csrf_token() }}");
+            navigator.sendBeacon(url, data);
+        }
+    });
 
     function updateCountdown() {
         if (secondsLeft <= 0) {
@@ -133,6 +149,7 @@
             actionInput.value = 'submit';
             form.appendChild(actionInput);
             
+            isSubmittingNext = true;
             form.submit();
             return;
         }
@@ -169,6 +186,7 @@
             actionInput.value = nextAction;
             form.appendChild(actionInput);
             
+            isSubmittingNext = true;
             form.submit();
             return;
         }
