@@ -25,6 +25,13 @@
     --color-brand-800: #115e56;
     --color-brand-900: #134e4a;
     --color-brand-950: #042f2c;
+    
+    /* Classmate Aliases for Auth Pages */
+    --color-brand-primary: var(--color-brand-700);
+    --color-brand-secondary: var(--color-brand-900);
+    --color-brand-accent: var(--color-brand-400);
+    --color-brand-light: #f0fdfa;
+    --color-brand-dark: #1f2937;
 
     /* Neutral / surface tokens (Notion-ish warm-cool gray) */
     --color-canvas: #f7f8f8;
@@ -157,3 +164,6 @@
 
 /* Hide Alpine-cloaked elements before init */
 [x-cloak] { display: none !important; }
+
+/* Classmate Dark Mode Support */
+@custom-variant dark (&:where(.dark, .dark *));

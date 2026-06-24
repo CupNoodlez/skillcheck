@@ -1,47 +1,126 @@
-@extends('layouts.guest')
-
-@section('title', 'Register')
+@extends('layouts.app')
 
 @section('content')
-    <div class="mb-6 text-center">
-        <h1 class="text-xl font-semibold text-ink">Create your account</h1>
-        <p class="mt-1 text-sm text-muted">Get started with SkillCheck</p>
-    </div>
+<div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="text-center">
+    <a href="{{ url('/') }}" class="inline-block">
+      <img src="{{ asset('images/Logo.svg') }}" class="mx-auto h-16 w-auto" alt="SkillCheck Logo" />
+    </a>
+    <h1 class="mt-6 text-2xl font-bold tracking-tight text-brand-dark dark:text-brand-light sm:text-3xl">
+      Welcome to SkillCheck!
+    </h1>
+    <p class="mt-2 text-sm text-gray-500 dark:text-brand-light/75">
+      Let's Get You Started
+    </p>
+  </div>
 
+  <div class="mt-8 rounded-2xl border border-brand-primary/10 bg-white p-8 shadow-lg dark:bg-brand-dark dark:border-brand-light/10">
     @if ($errors->any())
-        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            <ul class="list-disc space-y-0.5 pl-4">
-                @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/20 dark:text-red-400">
+            <ul class="mb-0 list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
             </ul>
         </div>
     @endif
 
     <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-        @csrf
-        <x-ui.input label="Username" name="username" value="{{ old('username') }}" required />
-        <x-ui.input label="Email Address" name="email" type="email" value="{{ old('email') }}" required />
+      @csrf
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-ui.input label="Password" name="password" type="password" required />
-            <x-ui.input label="Confirm Password" name="password_confirmation" type="password" required />
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-brand-light/95">Username</label>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            class="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary dark:bg-brand-dark dark:border-brand-light/10 dark:text-brand-light mt-1"
+            placeholder="Enter username"
+            value="{{ old('username') }}"
+            required
+          />
         </div>
-
-        <x-ui.select label="Account Role" name="role" required>
-            <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student (Take Exams)</option>
-            <option value="instructor" {{ old('role') === 'instructor' ? 'selected' : '' }}>Instructor (Manage Exams)</option>
-        </x-ui.select>
 
         <div>
-            <label for="profile_picture" class="mb-1.5 block text-sm font-medium text-ink">Profile Picture</label>
-            <input type="file" name="profile_picture" id="profile_picture" accept="image/*"
-                class="block w-full text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100">
-            <p class="mt-1.5 text-xs text-muted">Optional. JPEG/PNG/WebP, max 2MB.</p>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-brand-light/95">Email Address</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            class="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary dark:bg-brand-dark dark:border-brand-light/10 dark:text-brand-light mt-1"
+            placeholder="Enter email address"
+            value="{{ old('email') }}"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-brand-light/95">Password</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary dark:bg-brand-dark dark:border-brand-light/10 dark:text-brand-light mt-1"
+            placeholder="Create password"
+            required
+          />
         </div>
 
-        <x-ui.button type="submit" variant="primary" class="w-full">Create Account</x-ui.button>
-    </form>
-@endsection
+        <div>
+          <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-brand-light/95">Confirm Password</label>
+          <input
+            type="password"
+            name="password_confirmation"
+            id="password_confirmation"
+            class="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary dark:bg-brand-dark dark:border-brand-light/10 dark:text-brand-light mt-1"
+            placeholder="Re-enter password"
+            required
+          />
+        </div>
+      </div>
 
-@section('below')
-    Already have an account? <a href="{{ route('login') }}" class="font-medium text-brand-700 hover:text-brand-800">Log in</a>
+      <div>
+        <label for="role" class="block text-sm font-medium text-gray-700 dark:text-brand-light/95">Account Role</label>
+        <select
+          name="role"
+          id="role"
+          class="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary dark:bg-brand-dark dark:border-brand-light/10 dark:text-brand-light mt-1"
+          required
+        >
+          <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student (Take Exams)</option>
+          <option value="instructor" {{ old('role') === 'instructor' ? 'selected' : '' }}>Instructor (Manage Exams)</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="profile_picture" class="block text-sm font-medium text-gray-700 dark:text-brand-light/95">Profile Picture</label>
+        <input
+          type="file"
+          name="profile_picture"
+          id="profile_picture"
+          class="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary dark:bg-brand-dark dark:border-brand-light/10 dark:text-brand-light mt-1 bg-white"
+          accept="image/*"
+        />
+        <p class="text-xs text-gray-400 mt-1">Optional. Recommended format: JPEG/PNG/WebP, max 2MB.</p>
+      </div>
+
+      <button
+        type="submit"
+        class="block w-full rounded-lg bg-brand-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-secondary transition dark:bg-brand-accent dark:text-brand-secondary dark:hover:bg-brand-light"
+      >
+        Create Account
+      </button>
+
+      <p class="text-center text-sm text-gray-500 dark:text-brand-light/70 mt-6">
+        Already have an account?
+        <a class="underline text-brand-primary hover:text-brand-secondary dark:text-brand-accent dark:hover:text-brand-light" href="{{ route('login') }}">
+          Login here
+        </a>
+      </p>
+    </form>
+  </div>
+</div>
 @endsection
