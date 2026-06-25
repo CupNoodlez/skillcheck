@@ -19,7 +19,7 @@
 
                 <x-ui.textarea label="Question Text" name="question_text" rows="4" required placeholder="Type the question content here...">{{ old('question_text', $question->question_text) }}</x-ui.textarea>
 
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-4 sm:grid-cols-2 {{ $exam->timer_type === 'per_question' ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }}">
                     <div class="sm:col-span-2">
                         <x-ui.select label="Question Type" name="type" id="type" required>
                             <option value="multiple_choice" {{ old('type', $question->type) == 'multiple_choice' ? 'selected' : '' }}>Multiple Choice</option>
@@ -31,9 +31,11 @@
 
                     <x-ui.input type="number" label="Marks" name="marks" id="marks" step="0.01" :value="old('marks', $question->marks)" required min="0" />
 
-                    <x-ui.input type="number" label="Time Limit (Sec)" name="time_limit_s" id="time_limit_s" :value="old('time_limit_s', $question->time_limit_s)" min="1"
-                        placeholder="{{ $exam->timer_type === 'per_question' ? 'Required' : 'Optional' }}"
-                        :required="$exam->timer_type === 'per_question'" />
+                    @if($exam->timer_type === 'per_question')
+                        <x-ui.input type="number" label="Time Limit (Sec)" name="time_limit_s" id="time_limit_s" :value="old('time_limit_s', $question->time_limit_s)" min="1"
+                            placeholder="Required"
+                            required />
+                    @endif
                 </div>
 
                 <div>

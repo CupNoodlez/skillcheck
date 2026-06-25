@@ -37,7 +37,7 @@ class QuestionController extends Controller
         $validated = $request->validate([
             'question_text' => 'required|string',
             'type' => 'required|string|in:multiple_choice,true_false,question_answer,essay',
-            'time_limit_s' => ($exam->timer_type === 'per_question' ? 'required' : 'nullable') . '|integer|min:1',
+            'time_limit_s' => ($exam->timer_type === 'per_question' ? 'required|integer|min:1' : 'nullable'),
             'image' => 'nullable|image|max:2048',
             'image_url' => 'nullable|string|max:2048',
             'marks' => 'required|numeric|min:0',
@@ -64,7 +64,7 @@ class QuestionController extends Controller
             'order_index' => $nextOrder,
             'question_text' => $validated['question_text'],
             'type' => $validated['type'],
-            'time_limit_s' => $validated['time_limit_s'] ?? null,
+            'time_limit_s' => $exam->timer_type === 'per_question' ? ($validated['time_limit_s'] ?? null) : null,
             'image_url' => $imagePath,
             'marks' => $validated['marks'],
             'is_locked' => $request->boolean('is_locked'),
@@ -105,7 +105,7 @@ class QuestionController extends Controller
         $validated = $request->validate([
             'question_text' => 'required|string',
             'type' => 'required|string|in:multiple_choice,true_false,question_answer,essay',
-            'time_limit_s' => ($exam->timer_type === 'per_question' ? 'required' : 'nullable') . '|integer|min:1',
+            'time_limit_s' => ($exam->timer_type === 'per_question' ? 'required|integer|min:1' : 'nullable'),
             'image' => 'nullable|image|max:2048',
             'image_url' => 'nullable|string|max:2048',
             'remove_image' => 'nullable',
@@ -150,7 +150,7 @@ class QuestionController extends Controller
         $question->update([
             'question_text' => $validated['question_text'],
             'type' => $validated['type'],
-            'time_limit_s' => $validated['time_limit_s'] ?? null,
+            'time_limit_s' => $exam->timer_type === 'per_question' ? ($validated['time_limit_s'] ?? null) : null,
             'image_url' => $imagePath,
             'marks' => $validated['marks'],
             'is_locked' => $request->boolean('is_locked'),
