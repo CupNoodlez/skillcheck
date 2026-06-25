@@ -116,7 +116,7 @@
                                 class="w-24 rounded-lg border border-line-strong bg-white px-3 py-1.5 text-sm text-ink shadow-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 disabled:opacity-50"
                                 value="{{ $answer && $answer->marks_awarded !== null ? (float)$answer->marks_awarded : '' }}" required
                                 {{ !$answer ? 'disabled' : '' }}>
-                            <x-ui.button type="submit" size="sm" :variant="$question->type === 'essay' ? 'secondary' : 'primary'" @disabled(!$answer)>
+                            <x-ui.button type="submit" size="sm" :variant="$question->type === 'essay' ? 'secondary' : 'primary'" :disabled="!$answer">
                                 {{ $question->type === 'essay' ? 'Save Marks' : 'Override Marks' }}
                             </x-ui.button>
                             @if (!$answer)
