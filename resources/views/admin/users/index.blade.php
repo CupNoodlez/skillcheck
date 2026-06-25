@@ -12,11 +12,11 @@
         <form action="{{ route('admin.users.index') }}" method="GET" class="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:items-end">
             <div class="sm:col-span-5">
                 <x-ui.input
-                    label="Search Username or Email"
+                    label="Search Name, Username or Email"
                     name="search"
                     id="search"
                     value="{{ request('search') }}"
-                    placeholder="Search username or email..." />
+                    placeholder="Search name, username or email..." />
             </div>
             <div class="sm:col-span-3">
                 <x-ui.select label="Filter by Role" name="role" id="role">
@@ -56,7 +56,12 @@
                                 <div class="flex items-center gap-3">
                                     <x-ui.avatar :user="$user" size="md" />
                                     <div class="flex items-center gap-1.5">
-                                        <span class="font-semibold text-ink">{{ $user->username }}</span>
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold text-ink">{{ $user->name }}</span>
+                                            @if($user->first_name)
+                                                <span class="text-xs text-muted">{{ '@' . $user->username }}</span>
+                                            @endif
+                                        </div>
                                         @if($user->user_id === auth()->id())
                                             <x-ui.badge color="gray">You</x-ui.badge>
                                         @endif

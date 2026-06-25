@@ -11,7 +11,10 @@
             <x-ui.card class="text-center">
                 <div class="flex flex-col items-center">
                     <x-ui.avatar :user="$user" size="xl" />
-                    <h2 class="mt-4 text-lg font-semibold text-ink">{{ $user->username }}</h2>
+                    <h2 class="mt-4 text-lg font-semibold text-ink">{{ $user->name }}</h2>
+                    @if($user->first_name)
+                        <p class="text-xs text-muted -mt-1">{{ '@' . $user->username }}</p>
+                    @endif
                     <p class="mt-0.5 text-sm text-muted">{{ $user->email }}</p>
                     <div class="mt-3">
                         @php $roleColor = ['admin' => 'red', 'instructor' => 'brand', 'student' => 'blue'][$user->role] ?? 'gray'; @endphp
@@ -35,6 +38,12 @@
                     @method('PUT')
 
                     <div class="space-y-5">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <x-ui.input label="First Name" name="first_name" value="{{ old('first_name', $user->first_name) }}" required />
+                            <x-ui.input label="Middle Name" name="middle_name" value="{{ old('middle_name', $user->middle_name) }}" />
+                            <x-ui.input label="Last Name" name="last_name" value="{{ old('last_name', $user->last_name) }}" required />
+                        </div>
+
                         <x-ui.input label="Username" name="username" value="{{ old('username', $user->username) }}" required />
 
                         <div>

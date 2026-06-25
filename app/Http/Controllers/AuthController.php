@@ -26,6 +26,9 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'username' => 'required|string|alpha_dash|min:3|max:50|unique:Users,username',
+            'first_name' => 'required|string|max:100',
+            'middle_name' => 'nullable|string|max:100',
+            'last_name' => 'required|string|max:100',
             'email' => 'required|string|email|max:255|unique:Users,email',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'sometimes|string|in:student,instructor',
@@ -39,6 +42,9 @@ class AuthController extends Controller
 
         $user = User::create([
             'username' => $validated['username'],
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'] ?? null,
+            'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'password_hash' => Hash::make($validated['password']),
             'role' => $validated['role'] ?? 'student',
@@ -132,12 +138,18 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'username' => 'required|string|alpha_dash|min:3|max:50|unique:Users,username,' . $user->user_id . ',user_id',
+            'first_name' => 'required|string|max:100',
+            'middle_name' => 'nullable|string|max:100',
+            'last_name' => 'required|string|max:100',
             'password' => 'nullable|string|min:6|confirmed',
             'profile_picture' => 'nullable|image|max:2048',
         ]);
 
         $updateData = [
             'username' => $validated['username'],
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'] ?? null,
+            'last_name' => $validated['last_name'],
         ];
 
         if (!empty($validated['password'])) {

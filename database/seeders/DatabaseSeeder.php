@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
         // 1. Create Core Test Accounts
         User::create([
             'username' => 'admin',
+            'first_name' => 'Admin',
+            'last_name' => 'User',
             'email' => 'admin@skillcheck.com',
             'password_hash' => Hash::make('password'),
             'role' => 'admin',
@@ -29,6 +31,8 @@ class DatabaseSeeder extends Seeder
 
         $instructor = User::create([
             'username' => 'instructor',
+            'first_name' => 'Instructor',
+            'last_name' => 'User',
             'email' => 'instructor@skillcheck.com',
             'password_hash' => Hash::make('password'),
             'role' => 'instructor',
@@ -37,6 +41,8 @@ class DatabaseSeeder extends Seeder
 
         $student = User::create([
             'username' => 'student',
+            'first_name' => 'Student',
+            'last_name' => 'User',
             'email' => 'student@skillcheck.com',
             'password_hash' => Hash::make('password'),
             'role' => 'student',

@@ -28,6 +28,46 @@
     <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
       @csrf
 
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div>
+          <label for="first_name" class="block text-sm font-medium text-black mb-1.5">First Name</label>
+          <input
+            type="text"
+            name="first_name"
+            id="first_name"
+            class="w-full rounded-xl border border-black/10 bg-transparent p-3.5 text-sm text-black shadow-inner placeholder-black/50 focus:border-brand-500 focus:bg-black/5 focus:ring-1 focus:ring-brand-500 transition-all duration-200"
+            placeholder="John"
+            value="{{ old('first_name') }}"
+            required
+          />
+        </div>
+
+        <div>
+          <label for="middle_name" class="block text-sm font-medium text-black mb-1.5">Middle Name</label>
+          <input
+            type="text"
+            name="middle_name"
+            id="middle_name"
+            class="w-full rounded-xl border border-black/10 bg-transparent p-3.5 text-sm text-black shadow-inner placeholder-black/50 focus:border-brand-500 focus:bg-black/5 focus:ring-1 focus:ring-brand-500 transition-all duration-200"
+            placeholder="Optional"
+            value="{{ old('middle_name') }}"
+          />
+        </div>
+
+        <div>
+          <label for="last_name" class="block text-sm font-medium text-black mb-1.5">Last Name</label>
+          <input
+            type="text"
+            name="last_name"
+            id="last_name"
+            class="w-full rounded-xl border border-black/10 bg-transparent p-3.5 text-sm text-black shadow-inner placeholder-black/50 focus:border-brand-500 focus:bg-black/5 focus:ring-1 focus:ring-brand-500 transition-all duration-200"
+            placeholder="Doe"
+            value="{{ old('last_name') }}"
+            required
+          />
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label for="username" class="block text-sm font-medium text-black mb-1.5">Username</label>

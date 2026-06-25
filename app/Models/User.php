@@ -24,6 +24,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'username',
+        'first_name',
+        'middle_name',
+        'last_name',
         'email',
         'password_hash',
         'role',
@@ -58,5 +61,16 @@ class User extends Authenticatable
             'password_hash' => 'hashed',
             'is_suspended' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the user's full name, falling back to username.
+     */
+    public function getNameAttribute()
+    {
+        if ($this->first_name) {
+            return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
+        }
+        return $this->username;
     }
 }
